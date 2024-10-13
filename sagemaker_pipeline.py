@@ -11,7 +11,7 @@ import boto3
 # Click on "Roles" and then "Create role".
 # Select "SageMaker" as the service, and attach the necessary policies like "AmazonS3FullAccess" and "AmazonSageMakerFullAccess".
 # Name the role as "SageMakerExecutionRole" and click "Create role".
-role = 'arn:aws:iam::YOUR_ACCOUNT_ID:role/SageMakerExecutionRole'
+role = 'arn:aws:iam::252927399996:role/SageMakerExecutionRole'
 
 # Step 2: Create a Docker image or use a pre-built one
 # Option 1: Use a built-in Amazon SageMaker image URI for scikit-learn
