@@ -4,12 +4,11 @@ from sagemaker.workflow.steps import ProcessingStep, TrainingStep, ModelStep
 from sagemaker.processing import ScriptProcessor
 from sagemaker.estimator import Estimator
 from sagemaker.model import Model
-from sagemaker.workflow.execution_variables import ExecutionVariables
-from sagemaker.inputs import TrainingInput
+from sagemaker.inputs import ProcessingInput, ProcessingOutput, TrainingInput
 
 # Set up session
 sagemaker_session = sagemaker.Session()
-role = "arn:aws:iam::YOUR_ACCOUNT_ID:role/SageMakerExecutionRole"  # Replace with your SageMaker role ARN
+role = "arn:aws:iam::252927399996:role/SageMakerExecutionRole"  # Replace with your SageMaker role ARN
 
 # Data Pre-Processing Step
 script_processor = ScriptProcessor(
@@ -23,12 +22,16 @@ processing_step = ProcessingStep(
     name="DataPreprocessingStep",
     processor=script_processor,
     inputs=[
-        # Add inputs
+        ProcessingInput(source="s3://aish-mlops-bucket/raw_data/input.csv",  # Replace with actual data path
+                        destination="/opt/ml/processing/input")
     ],
     outputs=[
-        # Add outputs
+        ProcessingOutput(source="/opt/ml/processing/train",
+                         destination="s3://aish-mlops-bucket/processed_data/train"),
+        ProcessingOutput(source="/opt/ml/processing/test",
+                         destination="s3://aish-mlops-bucket/processed_data/test")
     ],
-    code="preprocessing.py",  # Add your data preprocessing script here
+    code="preprocessing.py",
 )
 
 # Model Training Step
@@ -37,7 +40,7 @@ estimator = Estimator(
     role=role,
     instance_count=1,
     instance_type="ml.m5.xlarge",
-    output_path="s3://YOUR_BUCKET_NAME/model_artifacts",  # Replace with your S3 bucket
+    output_path="s3://aish-mlops-bucket/model_artifacts",  # Replace with your S3 bucket
 )
 
 training_step = TrainingStep(
@@ -45,13 +48,13 @@ training_step = TrainingStep(
     estimator=estimator,
     inputs={
         "train": TrainingInput(
-            s3_data="s3://YOUR_BUCKET_NAME/train",  # Replace with your training data path
+            s3_data="s3://aish-mlops-bucket/processed_data/train",  # Use output from processing step
             content_type="text/csv"
         )
     }
 )
 
-# Model Evaluation and Registration Step
+# Model Registration Step
 model = Model(
     image_uri="683313688378.dkr.ecr.us-west-2.amazonaws.com/sagemaker-xgboost:1.2-2",
     model_data=training_step.properties.ModelArtifacts.S3ModelArtifacts,
