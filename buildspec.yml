@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - pip install --upgrade pip
+      - pip install -r requirements.txt  # Install dependencies defined in requirements.txt
+  build:
+    commands:
+      - python create_sagemaker_pipeline.py  # Run script to create and execute SageMaker pipeline
+artifacts:
+  files:
+    - '**/*'
